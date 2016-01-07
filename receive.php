@@ -1,4 +1,4 @@
 <?php
-$post = $_POST;
-file_put_contents(json_encode($_POST), __DIR__.'/msg.log');
+//明文
+$post = file_get_contents("php://input");
 echo 'hello';
