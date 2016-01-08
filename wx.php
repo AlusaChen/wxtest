@@ -9,6 +9,7 @@ class Wx
     protected static $access_token_log = __DIR__.'/data/access.log';
     protected static $msg_file = __DIR__.'/data/msg.log';
     protected static $file_file = __DIR__.'/data/file.log';
+    protected static $media_file = __DIR__.'/data/media.log';
 
     protected static $config = [
         'appID'     => 'wx3602f3ba4c085c82',
@@ -68,6 +69,59 @@ class Wx
         }
     }
 
+    public static function upload_media($media_info, $type = 'image')
+    {
+        $access_token = self::get_access_token();
+        $url = 'https://api.weixin.qq.com/cgi-bin/media/upload?access_token='.$access_token.'&type='.$type;
+        $media = curl_file_create($media_info['path'], $media_info['type']);
+        $curl = self::curl();
+        $ret = $curl->post($url, [
+            'media' => $media
+        ]);
+        file_put_contents(self::$media_file, $ret, FILE_APPEND);
+        return $ret;
+    }
+
+    public static function get_media($media_id)
+    {
+        $access_token = self::get_access_token();
+        $url = 'https://api.weixin.qq.com/cgi-bin/media/get?access_token='.$access_token.'&media_id='.$media_id;
+        $curl = self::curl();
+        $ret = $curl->download($url, '/tmp/'.$media_id);
+        return $ret;
+    }
+
+    public static function add_material()
+    {
+        $access_token = self::get_access_token();
+        $url = 'https://api.weixin.qq.com/cgi-bin/material/add_news?access_token='.$access_token;
+        $curl = self::curl();
+        $send_material = [
+            'articles' => [
+                [
+                    'title' => 'part 1',
+                    'thumb_media_id' => 'IabJTdJzb2Acq3E5EFiackyn5YmN8I8kl7gHK4nU_mP9rvoWPascxEGO3zgoPphA',
+                    'author' => 'Alusa1',
+                    'digest' => 'aa',
+                    'show_cover_pic' => 1,
+                    'content' => 'hello world',
+                    'content_source_url' => 'www.baidu.com'
+                ],
+                [
+                    'title' => 'part 2',
+                    'thumb_media_id' => 'N6zwTj8N5YoMUQPw6C31uMGzSgi23PKermSAEqd4scV8H7_iIMp5AX0EeZ2RinRV',
+                    'author' => 'Alusa2',
+                    'digest' => 'dd',
+                    'show_cover_pic' => 1,
+                    'content' => 'hello world2',
+                    'content_source_url' => 'www.baidu2.com'
+                ]
+            ]
+        ];
+        $ret = $curl->post($url, $send_material);
+        return $ret;
+    }
+
     public static function upload_image($img_path)
     {
         $access_token = self::get_access_token();
@@ -101,4 +155,39 @@ class Wx
         $ret = $curl->get($url);
         return $ret;
     }
+
+    public static function get_material_count()
+    {
+        $access_token = self::get_access_token();
+        $url = 'https://api.weixin.qq.com/cgi-bin/material/get_materialcount?access_token='.$access_token;
+        $curl = self::curl();
+        $ret = $curl->get($url);
+        return $ret;
+    }
+
+    public static function upload_news()
+    {
+        $access_token = self::get_access_token();
+        $url = 'https://api.weixin.qq.com/cgi-bin/message/mass/sendall?access_token='.$access_token;
+    }
+
+    public static function send_message()
+    {
+        $access_token = self::get_access_token();
+        $url = 'https://api.weixin.qq.com/cgi-bin/message/mass/sendall?access_token='.$access_token;
+        $send_data = [
+            'filter' => [
+                'is_to_all' => true,
+            ],
+            'mpnews' => [
+                'media_id'=>'123dsdajkasd231jhksad'
+            ],
+            'msgtype' => 'mpnews'
+        ];
+
+        $curl = self::curl();
+        $ret = $curl->post($url, json_encode($send_data));
+        return $ret;
+    }
+
 }
