@@ -10,6 +10,7 @@ class Wx
     protected static $msg_file = __DIR__.'/data/msg.log';
     protected static $file_file = __DIR__.'/data/file.log';
     protected static $media_file = __DIR__.'/data/media.log';
+    protected static $media_forever_file = __DIR__.'/data/forever_media.log';
 
     protected static $config = [
         'appID'     => 'wx3602f3ba4c085c82',
@@ -94,31 +95,13 @@ class Wx
     public static function add_material()
     {
         $access_token = self::get_access_token();
-        $url = 'https://api.weixin.qq.com/cgi-bin/material/add_news?access_token='.$access_token;
+        $url = 'https://api.weixin.qq.com/cgi-bin/material/add_material?access_token='.$access_token;
         $curl = self::curl();
-        $send_material = [
-            'articles' => [
-                [
-                    'title' => 'part 1',
-                    'thumb_media_id' => 'IabJTdJzb2Acq3E5EFiackyn5YmN8I8kl7gHK4nU_mP9rvoWPascxEGO3zgoPphA',
-                    'author' => 'Alusa1',
-                    'digest' => 'aa',
-                    'show_cover_pic' => 1,
-                    'content' => 'hello world',
-                    'content_source_url' => 'www.baidu.com'
-                ],
-                [
-                    'title' => 'part 2',
-                    'thumb_media_id' => 'N6zwTj8N5YoMUQPw6C31uMGzSgi23PKermSAEqd4scV8H7_iIMp5AX0EeZ2RinRV',
-                    'author' => 'Alusa2',
-                    'digest' => 'dd',
-                    'show_cover_pic' => 1,
-                    'content' => 'hello world2',
-                    'content_source_url' => 'www.baidu2.com'
-                ]
-            ]
-        ];
-        $ret = $curl->post($url, $send_material);
+        $ret = $curl->post($url, [
+            'type' => 'image',
+            'media' => '@/Users/alusa/Downloads/2.jpg'
+        ]);
+        file_put_contents(self::$media_forever_file, $ret, FILE_APPEND);
         return $ret;
     }
 
@@ -177,17 +160,110 @@ class Wx
         $url = 'https://api.weixin.qq.com/cgi-bin/message/mass/sendall?access_token='.$access_token;
         $send_data = [
             'filter' => [
-                'is_to_all' => true,
+                'is_to_all' => false,
+                'group_id' => 100
             ],
-            'mpnews' => [
-                'media_id'=>'123dsdajkasd231jhksad'
+            'text' => [
+                'content'=>'<h1>Hello World</h1>'
             ],
-            'msgtype' => 'mpnews'
+            'msgtype' => 'text'
         ];
 
         $curl = self::curl();
         $ret = $curl->post($url, json_encode($send_data));
         return $ret;
     }
+
+    public static function create_group()
+    {
+        $access_token = self::get_access_token();
+        $url = "https://api.weixin.qq.com/cgi-bin/groups/create?access_token=".$access_token;
+        $curl = self::curl();
+        $group = [
+            'group' => [
+                'name' => '分组2'
+            ]
+        ];
+        $ret = $curl->post($url, json_encode($group) );
+        return $ret;
+    }
+
+    public static function move_user_to_group()
+    {
+        $access_token = self::get_access_token();
+        $url = "https://api.weixin.qq.com/cgi-bin/groups/members/update?access_token=".$access_token;
+        $curl = self::curl();
+        $send_data = [
+            'openid' => 'ogY7UjteXzwqF39bascYoX2vodsM',
+            'to_groupid' => 100
+        ];
+        $ret = $curl->post($url, json_encode($send_data) );
+        return $ret;
+    }
+
+    public static function set_industry_no()
+    {
+        $access_token = self::get_access_token();
+        $url = "https://api.weixin.qq.com/cgi-bin/template/api_set_industry?access_token=".$access_token;
+        $curl = self::curl();
+        $send_data = [
+            'industry_id1' => 9,
+            'industry_id2' => 1
+        ];
+        $ret = $curl->post($url, json_encode($send_data) );
+        return $ret;
+    }
+
+    public static function add_tpl()
+    {
+        $access_token = self::get_access_token();
+        $url = "https://api.weixin.qq.com/cgi-bin/template/api_add_template?access_token=".$access_token;
+        $curl = self::curl();
+        $send_data = [
+            'template_id_short' => 'TM00015'
+        ];
+        $ret = $curl->post($url, json_encode($send_data) );
+        return $ret;
+    }
+
+    public static function send_tpl_message($openid)
+    {
+        $tpl_id = 'hAzsbVfuLl_lf-DUFlev-Ibp5rNCzI-F88feFusbgmM';
+        $access_token = self::get_access_token();
+        $url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=".$access_token;
+        $curl = self::curl();
+        $send_data = [
+            'touser' => $openid,
+            'template_id' => $tpl_id,
+            'url' => '',
+            'data' => [
+                'first' => [
+                    'value' => '恭喜你购买成功！',
+                    "color" => "#173177",
+                ],
+                'keynote1' => [
+                    "value"=>"巧克力",
+                    "color"=>"#173177"
+                ],
+                "keynote2"=> [
+                    "value"=>"39.8元",
+                    "color"=>"#173177"
+                ],
+                "keynote3"=>[
+                   "value"=>"2016年01月10日",
+                   "color"=>"#173177",
+                ],
+               "remark"=> [
+                   "value" => "欢迎再次购买！",
+                   "color"=>"#173177"
+               ]
+            ]
+        ];
+        $ret = $curl->post($url, json_encode($send_data) );
+        return $ret;
+
+    }
+
+
 
 }

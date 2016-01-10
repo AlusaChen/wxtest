@@ -24,13 +24,14 @@ echo '<pre>';
 print_r($info);
 echo '</pre>';
 */
-
 /*
+$wx = new Wx();
 $info = Wx::get_openids();
 echo '<pre>';
 print_r($info);
 echo '</pre>';
-
+*/
+/*
 $next_id = $info->next_openid;
 $info = Wx::get_openids($next_id);
 echo '<pre>';
@@ -62,6 +63,12 @@ $ret = Wx::add_material();
 debug($ret);
 */
 /*
-$ret = Wx::get_material_count();
+$ret = Wx::add_material();
+debug($ret);
+
+$ret = Wx::create_group();
 debug($ret);
 */
+$openid = 'ogY7UjteXzwqF39bascYoX2vodsM';
+$ret = Wx::send_tpl_message($openid);
+debug($ret);

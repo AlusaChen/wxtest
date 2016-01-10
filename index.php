@@ -1,4 +1,8 @@
 <?php
+file_put_contents('/tmp/wx_data.log', file_get_contents("php://input")."\n", FILE_APPEND);
+echo 'success';
+
+/*
 if($_GET)
 {
 	$signature = $_GET["signature"];
@@ -27,4 +31,5 @@ else
 	echo json_encode(['name'=>'Alusa','age'=>10]);
 
 }
+*/
 ?>
